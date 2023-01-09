@@ -1,6 +1,6 @@
 {
-    "name": "morphp/medas-placeholder",
-    "description": "Medas placeholder",
+    "name": "morphp/medas-events",
+    "description": "Medas events",
     "authors": [
         {
             "name": "Patrick Morpey",
@@ -18,8 +18,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Medas\\Placeholder\\": "src/",
-            "Medas\\PlaceholderTest\\": "tests/"
+            "Medas\\Events\\": "src/",
+            "Medas\\EventsTest\\": "tests/"
         }
     }
 }
