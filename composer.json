@@ -11,7 +11,8 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "morphp/medas-service-manager": "dev-dev"
+        "morphp/medas-service-manager": "dev-dev",
+        "psr/event-dispatcher": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5"
