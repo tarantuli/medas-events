@@ -6,9 +6,12 @@ namespace Medas\Events;
 
 class Listener implements Interfaces\Listener
 {
+    private \Closure $callable;
+
     public function __construct(
-        private readonly string   $eventName,
-        private readonly \Closure $callable,
+        private readonly string $eventName,
+        private readonly string $className,
+        private readonly string $methodName,
     )
     {
     }
@@ -20,6 +23,10 @@ class Listener implements Interfaces\Listener
 
     public function callable(): callable
     {
+        if (!isset($this->callable)) {
+            $this->callable = (new \ReflectionMethod($this->className, $this->methodName))->getClosure(sm()->resolve($this->className));
+        }
+
         return $this->callable;
     }
 }

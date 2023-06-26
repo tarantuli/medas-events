@@ -47,10 +47,9 @@ class ListenerFinder
     private function addListener(\ReflectionMethod $method, string $className): void
     {
         $types = $this->firstParameterTypesFinder->find($method);
-        $closure = $method->getClosure(sm()->resolve($className));
 
         foreach ($types as $type) {
-            $this->listeners[] = new \Medas\Events\Listener($type, $closure);
+            $this->listeners[] = new \Medas\Events\Listener($type, $className, $method->name);
         }
     }
 }

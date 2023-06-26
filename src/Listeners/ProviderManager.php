@@ -6,14 +6,14 @@ namespace Medas\Events\Listeners;
 
 use Medas\Events\Interfaces\Listener;
 use Medas\ServiceManager\Attributes\Service;
-use Medas\ServiceManager\Cache\Interfaces\Cache;
+use Medas\ServiceManager\Cache\CacheManager;
 use Psr\EventDispatcher\ListenerProviderInterface;
 
 #[Service]
 class ProviderManager implements ListenerProviderInterface
 {
     public function __construct(
-        private readonly Cache|null     $cache,
+        private readonly CacheManager   $cacheManager,
         private readonly ListenerFinder $listenerFinder,
     )
     {
@@ -34,9 +34,9 @@ class ProviderManager implements ListenerProviderInterface
     /** @return Listener[] $listeners */
     private function getListeners(): iterable
     {
-        return $this->cache?->get(
+        return $this->cacheManager->get()->get(
             __CLASS__ . '::' . __METHOD__,
             fn() => $this->listenerFinder->findAll()
-        ) ?? $this->listenerFinder->findAll();
+        );
     }
 }
