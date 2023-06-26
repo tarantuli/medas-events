@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Medas\Events\Listeners;
 
-use Medas\Events\Interfaces\EventListener;
-use Medas\Events\Interfaces\Listener;
-use Medas\ServiceManager\Attributes\Service;
+use Medas\Core\Attributes\Service;
+use Medas\Events\Interfaces\{EventListener, Listener};
 
 #[Service]
 class ListenerFinder

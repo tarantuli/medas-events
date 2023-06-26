@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Medas\Events;
 
+use Medas\Core\Attributes\Service;
 use Medas\Events\Listeners\ProviderManager;
-use Medas\ServiceManager\Attributes\Service;
 use Psr\EventDispatcher\StoppableEventInterface;
 
 #[Service]

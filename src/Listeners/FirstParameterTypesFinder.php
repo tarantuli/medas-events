@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Medas\Events\Listeners;
 
+use Medas\Core\Attributes\Service;
 use Medas\Events\Exceptions\FirstParameterOfEventListenerIsNotAClass;
-use Medas\ServiceManager\Attributes\Service;
 
 #[Service]
 class FirstParameterTypesFinder
