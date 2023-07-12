@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Medas\Events\Listeners;
 
 use Medas\Core\Attributes\Service;
+use Medas\Core\Interfaces\CacheManager;
 use Medas\Events\Interfaces\Listener;
-use Medas\ServiceManager\Cache\CacheManager;
 use Psr\EventDispatcher\ListenerProviderInterface;
 
 #[Service]
