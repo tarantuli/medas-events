@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Medas\Events\Listeners;
 
-use Medas\Core\Attributes\Service;
+use Medas\Core\Attributes\{EventListener as EventListenerAttribute, Service};
 use Medas\Core\Collections\GenericCollection;
 use Medas\Events\EventListener;
 
@@ -31,7 +31,7 @@ readonly class ListenerFinder
             }
 
             foreach ($class->getMethods() as $method) {
-                if (!$method->getAttributes(EventListener::class)) {
+                if (!$method->getAttributes(EventListenerAttribute::class)) {
                     continue;
                 }
 
