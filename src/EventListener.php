@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Medas\Events;
 
-class Listener implements Interfaces\Listener
+use Medas\Core\Interfaces\EventListener as EventListenerInterface;
+
+class EventListener implements EventListenerInterface
 {
     private \Closure $callable;
 

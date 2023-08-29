@@ -6,8 +6,7 @@ namespace Medas\Events\Listeners;
 
 use Medas\Core\Attributes\Service;
 use Medas\Core\Collections\GenericCollection;
-use Medas\Events\Interfaces\EventListener;
-use Medas\Events\Listener;
+use Medas\Events\EventListener;
 
 #[Service]
 readonly class ListenerFinder
@@ -21,7 +20,7 @@ readonly class ListenerFinder
         $this->listeners = new GenericCollection();
     }
 
-    /** @return Listener[] */
+    /** @return EventListener[] */
     public function findAll(): iterable
     {
         foreach (sm()->getServiceClassNames() as $className) {
@@ -48,7 +47,7 @@ readonly class ListenerFinder
         $types = $this->firstParameterTypesFinder->find($method);
 
         foreach ($types as $type) {
-            $this->listeners->offsetSet(null, new Listener($type, $className, $method->name));
+            $this->listeners->offsetSet(null, new EventListener($type, $className, $method->name));
         }
     }
 }
