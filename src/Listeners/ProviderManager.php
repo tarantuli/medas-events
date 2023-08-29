@@ -10,11 +10,11 @@ use Medas\Events\Interfaces\Listener;
 use Psr\EventDispatcher\ListenerProviderInterface;
 
 #[Service]
-class ProviderManager implements ListenerProviderInterface
+readonly class ProviderManager implements ListenerProviderInterface
 {
     public function __construct(
-        private readonly CacheManager   $cacheManager,
-        private readonly ListenerFinder $listenerFinder,
+        private CacheManager   $cacheManager,
+        private ListenerFinder $listenerFinder,
     )
     {
     }

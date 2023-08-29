@@ -9,10 +9,10 @@ use Medas\Events\Listeners\ProviderManager;
 use Psr\EventDispatcher\StoppableEventInterface;
 
 #[Service]
-class EventDispatcher implements Interfaces\EventDispatcher
+readonly class EventDispatcher implements Interfaces\EventDispatcher
 {
     public function __construct(
-        private readonly ProviderManager $providerManager,
+        private ProviderManager $providerManager,
     )
     {
     }
