@@ -30,9 +30,9 @@ class FirstParameterTypesFinder
 
             return [$type->getName()];
         }
-
         elseif ($type instanceof \ReflectionUnionType || $type instanceof \ReflectionIntersectionType) {
             $types = [];
+
             foreach ($type->getTypes() as $subType) {
                 if (!$subType->isBuiltin()) {
                     $types[] = $subType->getName();

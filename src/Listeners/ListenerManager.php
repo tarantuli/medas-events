@@ -10,7 +10,7 @@ use Medas\Events\Interfaces\Listener;
 use Psr\EventDispatcher\ListenerProviderInterface;
 
 #[Service]
-readonly class ProviderManager implements ListenerProviderInterface
+readonly class ListenerManager implements ListenerProviderInterface
 {
     public function __construct(
         private CacheManager   $cacheManager,
@@ -35,7 +35,7 @@ readonly class ProviderManager implements ListenerProviderInterface
     private function getListeners(): iterable
     {
         return $this->cacheManager->get()->get(
-            __CLASS__ . '::' . __METHOD__,
+            __CLASS__,
             fn() => $this->listenerFinder->findAll()
         );
     }

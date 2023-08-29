@@ -9,7 +9,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 interface EventDispatcher extends EventDispatcherInterface
 {
     /**
-     * The return value  is an object of type $event. This is specified in PhpStorm in .phpstorm.meta.php
+     * The return value is the object that was passed as $event. This is specified in PhpStorm in .phpstorm.meta.php
      */
     public function dispatch(object $event): object;
 }

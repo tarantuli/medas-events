@@ -5,25 +5,25 @@ declare(strict_types=1);
 namespace Medas\Events\Listeners;
 
 use Medas\Core\Attributes\Service;
-use Medas\Events\Interfaces\{EventListener, Listener};
+use Medas\Core\Collections\GenericCollection;
+use Medas\Events\Interfaces\EventListener;
+use Medas\Events\Listener;
 
 #[Service]
-class ListenerFinder
+readonly class ListenerFinder
 {
-    private array $listeners;
+    private GenericCollection $listeners;
 
     public function __construct(
-        private readonly FirstParameterTypesFinder $firstParameterTypesFinder,
+        private FirstParameterTypesFinder $firstParameterTypesFinder,
     )
     {
+        $this->listeners = new GenericCollection();
     }
 
     /** @return Listener[] */
     public function findAll(): iterable
     {
-        /** @var Listener[] $listeners */
-        $this->listeners = [];
-
         foreach (sm()->getServiceClassNames() as $className) {
             $class = new \ReflectionClass($className);
 
@@ -48,7 +48,7 @@ class ListenerFinder
         $types = $this->firstParameterTypesFinder->find($method);
 
         foreach ($types as $type) {
-            $this->listeners[] = new \Medas\Events\Listener($type, $className, $method->name);
+            $this->listeners->offsetSet(null, new Listener($type, $className, $method->name));
         }
     }
 }

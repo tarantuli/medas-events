@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Medas\Events;
 
 use Medas\Core\Attributes\Service;
-use Medas\Events\Listeners\ProviderManager;
+use Medas\Events\Listeners\ListenerManager;
 use Psr\EventDispatcher\StoppableEventInterface;
 
 #[Service]
 readonly class EventDispatcher implements Interfaces\EventDispatcher
 {
     public function __construct(
-        private ProviderManager $providerManager,
+        private ListenerManager $providerManager,
     )
     {
     }
