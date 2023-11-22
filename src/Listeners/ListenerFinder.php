@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Medas\Events\Listeners;
 
-use Medas\Core\{Attributes\EventListener as EventListenerAttribute, Attributes\Service, Collections\GenericCollection};
+use Medas\Core\{
+    Attributes\EventListener as EventListenerAttribute,
+    Attributes\Service,
+    Collections\GenericCollection
+};
 use Medas\Events\EventListener;
 
 #[Service]
