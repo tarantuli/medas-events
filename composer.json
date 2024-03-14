@@ -1,6 +1,9 @@
 {
     "name": "morphp/medas-events",
     "description": "Medas events",
+    "keywords": [
+        "events"
+    ],
     "authors": [
         {
             "name": "Patrick Morpey",
