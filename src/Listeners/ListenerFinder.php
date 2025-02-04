@@ -4,28 +4,23 @@ declare(strict_types=1);
 
 namespace Medas\Events\Listeners;
 
-use Medas\Core\{
-    Attributes\EventListener as EventListenerAttribute,
-    Attributes\Service,
-    Collections\GenericCollection
-};
+use Medas\Core\Attributes\{EventListener as EventListenerAttribute, Service};
 use Medas\Events\EventListener;
 
 #[Service]
 readonly class ListenerFinder
 {
-    private GenericCollection $listeners;
-
     public function __construct(
         private FirstParameterTypesFinder $firstParameterTypesFinder,
     )
     {
-        $this->listeners = new GenericCollection();
     }
 
-    /** @return EventListener[] */
+    /** @return EventListener[][] */
     public function findAll(): iterable
     {
+        $listeners = [];
+
         foreach (sm()->getServiceClassNames() as $className) {
             $class = new \ReflectionClass($className);
 
@@ -38,19 +33,23 @@ readonly class ListenerFinder
                     continue;
                 }
 
-                $this->addListener($method, $className);
+                $this->addListener($listeners, $method, $className);
             }
         }
 
-        return $this->listeners;
+        return $listeners;
     }
 
-    private function addListener(\ReflectionMethod $method, string $className): void
+    private function addListener(array &$listeners, \ReflectionMethod $method, string $className): void
     {
         $types = $this->firstParameterTypesFinder->find($method);
 
         foreach ($types as $type) {
-            $this->listeners->offsetSet(null, new EventListener($type, $className, $method->name));
+            if (!isset($listeners[$type])) {
+                $listeners[$type] = [];
+            }
+
+            $listeners[$type][] = new EventListener($type, $className, $method->name);
         }
     }
 }

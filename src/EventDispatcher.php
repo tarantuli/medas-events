@@ -11,14 +11,35 @@ use Psr\EventDispatcher\StoppableEventInterface;
 readonly class EventDispatcher implements EventDispatcherInterface
 {
     public function __construct(
-        private Listeners\ListenerManager $providerManager,
+        private Listeners\ListenerManager $listenerManager,
     )
     {
     }
 
     public function dispatch(object $event): object
     {
-        foreach ($this->providerManager->getListenersForEvent($event) as $listener) {
+        foreach ($this->listenerManager->getListenersForEvent($event) as $listener) {
+            $listener($event);
+
+            if ($event instanceof StoppableEventInterface) {
+                if ($event->isPropagationStopped()) {
+                    return $event;
+                }
+            }
+        }
+
+        return $event;
+    }
+
+    public function lazyDispatch(string $eventType, callable $callable): object|null
+    {
+        $event = null;
+
+        foreach ($this->listenerManager->getListenersForEventType($eventType) as $listener) {
+            if ($event === null) {
+                $event = $callable();
+            }
+
             $listener($event);
 
             if ($event instanceof StoppableEventInterface) {

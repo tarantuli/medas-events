@@ -4,34 +4,38 @@ declare(strict_types=1);
 
 namespace Medas\Events\Listeners;
 
-use Medas\Core\{Attributes\Service, Interfaces\CacheManager, Interfaces\EventListener};
+use Medas\Core\{Attributes\Service, Interfaces\CacheManager};
 use Psr\EventDispatcher\ListenerProviderInterface;
 
 #[Service]
 readonly class ListenerManager implements ListenerProviderInterface
 {
+    private array $listeners;
+
     public function __construct(
         private CacheManager   $cacheManager,
         private ListenerFinder $listenerFinder,
     )
     {
+        $this->listeners = $this->cacheManager->get()->get(
+            __CLASS__,
+            fn() => $this->listenerFinder->findAll()
+        );
     }
 
     /** @return callable[] */
-    public function getListenersForEvent(object $event): iterable
+    public function getListenersForEvent($event): iterable
     {
-        $listeners = $this->getListeners();
-
-        foreach ($listeners as $listener) {
-            if ($listener->eventName() === $event::class) {
-                yield $listener->callable();
-            }
+        foreach ($this->listeners[$event::class] ?? [] as $listener) {
+            yield $listener->callable();
         }
     }
 
-    /** @return EventListener[] $listeners */
-    private function getListeners(): iterable
+    /** @return callable[] */
+    public function getListenersForEventType(string $eventType): iterable
     {
-        return $this->cacheManager->get()->get(__CLASS__, fn() => $this->listenerFinder->findAll());
+        foreach ($this->listeners[$eventType] ?? [] as $listener) {
+            yield $listener->callable();
+        }
     }
 }
