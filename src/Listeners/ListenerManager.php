@@ -17,6 +17,21 @@ readonly class ListenerManager implements ListenerProviderInterface
         private ListenerFinder $listenerFinder,
     )
     {
+        $this->initialize();
+    }
+
+    public function __serialize(): array
+    {
+        return [];
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->initialize();
+    }
+
+    private function initialize(): void
+    {
         $this->listeners = $this->cacheManager->get()->get(
             __CLASS__,
             fn() => $this->listenerFinder->findAll()
