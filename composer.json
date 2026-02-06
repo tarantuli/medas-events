@@ -1,29 +1,28 @@
 {
-    "name": "morphp/medas-events",
-    "description": "Medas events",
-    "keywords": [
-        "events"
-    ],
-    "authors": [
-        {
-            "name": "Patrick Morpey",
-            "email": "patrick@morphp.nl"
-        }
-    ],
-    "type": "library",
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "require": {
-        "morphp/medas-core": "dev-dev"
-    },
-    "require-dev": {
-        "morphp/medas-service-manager": "dev-dev",
-        "phpunit/phpunit": "^9.5"
-    },
-    "autoload": {
-        "psr-4": {
-            "Medas\\Events\\": "src/",
-            "Medas\\EventsTest\\": "tests/"
-        }
+  "name": "morphp/medas-events",
+  "description": "Medas events",
+  "version": "2.0.0",
+  "keywords": [
+    "events"
+  ],
+  "authors": [
+    {
+      "name": "Patrick Morpey",
+      "email": "patrick@morphp.nl"
     }
+  ],
+  "type": "library",
+  "require": {
+    "morphp/medas-core": "^2"
+  },
+  "require-dev": {
+    "morphp/medas-service-manager": "^2",
+    "phpunit/phpunit": "^9.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Medas\\Events\\": "src/",
+      "Medas\\EventsTest\\": "tests/"
+    }
+  }
 }
