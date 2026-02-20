@@ -21,10 +21,8 @@ readonly class EventDispatcher implements EventDispatcherInterface
         foreach ($this->listenerManager->getListenersForEvent($event) as $listener) {
             $listener($event);
 
-            if ($event instanceof StoppableEventInterface) {
-                if ($event->isPropagationStopped()) {
-                    return $event;
-                }
+            if ($event instanceof StoppableEventInterface && $event->isPropagationStopped()) {
+                return $event;
             }
         }
 
@@ -42,10 +40,8 @@ readonly class EventDispatcher implements EventDispatcherInterface
 
             $listener($event);
 
-            if ($event instanceof StoppableEventInterface) {
-                if ($event->isPropagationStopped()) {
-                    return $event;
-                }
+            if ($event instanceof StoppableEventInterface && $event->isPropagationStopped()) {
+                return $event;
             }
         }
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Medas\Events\Listeners;
 
 use Medas\Core\Attributes\{EventListener as EventListenerAttribute, Service};
-use Medas\Events\EventListener;
+use Medas\Events\{EventListener, Exceptions\FirstParameterOfEventListenerIsNotAClass};
 
 #[Service]
 readonly class ListenerFinder
@@ -16,8 +16,8 @@ readonly class ListenerFinder
     {
     }
 
-    /** @return EventListener[][] */
-    public function findAll(): iterable
+    /** @return array<string, EventListener[]> */
+    public function findAll(): array
     {
         $listeners = [];
 
@@ -33,13 +33,26 @@ readonly class ListenerFinder
                     continue;
                 }
 
-                $this->addListener($listeners, $method, $className);
+                try {
+                    $this->addListener($listeners, $method, $className);
+                }
+                catch (FirstParameterOfEventListenerIsNotAClass $e) {
+                    throw new \LogicException(
+                        sprintf(
+                            'Event listener method %s::%s is marked with #[EventListener] but its first parameter is not a class type.',
+                            $className,
+                            $method->name,
+                        ),
+                        previous: $e,
+                    );
+                }
             }
         }
 
         return $listeners;
     }
 
+    /** @param array<string, EventListener[]> $listeners */
     private function addListener(array &$listeners, \ReflectionMethod $method, string $className): void
     {
         $types = $this->firstParameterTypesFinder->find($method);

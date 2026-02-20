@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Medas\Events\Listeners;
 
 use Medas\Core\Attributes\Service;
-use Medas\Events\EventListener;
+use Medas\Core\Interfaces\EventListener;
 use Psr\EventDispatcher\ListenerProviderInterface;
 
 #[Service]
@@ -18,7 +18,7 @@ readonly class ListenerManager implements ListenerProviderInterface
     }
 
     /** @return callable[] */
-    public function getListenersForEvent($event): iterable
+    public function getListenersForEvent(object $event): iterable
     {
         foreach ($this->getListeners()[$event::class] ?? [] as $listener) {
             yield $listener->callable();
@@ -33,8 +33,8 @@ readonly class ListenerManager implements ListenerProviderInterface
         }
     }
 
-    /** @return EventListener[][] */
-    private function getListeners(): iterable
+    /** @return array<string, EventListener[]> */
+    private function getListeners(): array
     {
         return cache(__CLASS__, fn() => $this->listenerFinder->findAll());
     }
