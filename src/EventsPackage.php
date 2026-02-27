@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Medas\Events;
 
-use Medas\Core\AsSingleton;
-use Medas\ServiceManager\BasePackage;
+use Medas\Core\{AsSingleton, BasePackage};
 
 class EventsPackage extends BasePackage
 {

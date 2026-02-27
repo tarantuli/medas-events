@@ -26,10 +26,10 @@ class EventListener implements EventListenerInterface
     public function callable(): callable
     {
         if (!isset($this->callable)) {
-            $this->callable = (new \ReflectionMethod(
+            $this->callable = new \ReflectionMethod(
                 $this->className,
                 $this->methodName
-            ))->getClosure(sm()->resolve($this->className));
+            )->getClosure(sm()->resolve($this->className));
         }
 
         return $this->callable;

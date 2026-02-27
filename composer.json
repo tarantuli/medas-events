@@ -21,7 +21,11 @@
   },
   "autoload": {
     "psr-4": {
-      "Medas\\Events\\": "src/",
+      "Medas\\Events\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
       "Medas\\EventsTest\\": "tests/"
     }
   }
