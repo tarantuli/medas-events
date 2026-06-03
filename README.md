@@ -2,52 +2,47 @@
 
 Part of the [Medas framework](https://github.com/tarantuli/medas-core).
 
-A PSR-14 compliant event dispatcher with automatic, attribute-based listener discovery and a **lazy dispatch** mode that avoids constructing the event object when no listeners are registered.
+## Description
 
----
+A PSR-14 compatible event dispatcher with automatic, attribute-based listener discovery and a lazy dispatch mode. Events are plain PHP objects — no base class or interface is required. Listeners are public methods on any `#[Service]` class annotated with `#[EventListener]`; the framework discovers them automatically at first use by scanning all registered service classes.
 
-## Requirements
+Key features:
 
-- PHP 8.4+
-- [`morphp/medas-core`](https://github.com/tarantuli/medas-core) ^3
+- **Zero-configuration listener registration** — add `#[EventListener]` to a method, and it is found automatically; no manual wiring
+- **Union type support** — a listener method typed `EventA|EventB $event` is registered for both event types
+- **Lazy dispatch** — `lazyDispatch()` accepts the event class name and a factory callable; the factory is only invoked if at least one listener is registered, avoiding construction cost for unlistened events
+- **Propagation stopping** — implement `Psr\EventDispatcher\StoppableEventInterface` and return `true` from `isPropagationStopped()` inside a listener to halt the chain
+- **Result caching** — listener discovery runs once per request/process via the framework `cache()` helper
 
----
+The `dispatch()` global function (provided by `medas-core`) delegates to the `EventDispatcher` service, so most code never needs to inject it directly.
 
-## Installation
+## Usage
 
-```bash
-composer require morphp/medas-events
-```
+### Package developer context
 
-Register the package with the service manager in your application bootstrap:
+Register the package:
 
 ```php
 use Medas\Events\EventsPackage;
 
-EventsPackage::getInstance()->register();
+EventsPackage::instance();
 ```
 
----
-
-## Concepts
-
-### Events
-
-An event is any plain PHP object. No base class or interface is required. If you want to support propagation stopping, implement PSR-14's `Psr\EventDispatcher\StoppableEventInterface`.
+**Defining an event:**
 
 ```php
-class UserRegistered
+readonly class UserRegistered
 {
     public function __construct(
-        public readonly int $userId,
-        public readonly string $email,
+        public int    $userId,
+        public string $email,
     ) {}
 }
 ```
 
-### Listeners
+Any plain PHP object works. No base class or marker interface is needed.
 
-A listener is a public method on any class that is registered as a service (marked with `#[Service]`). Mark the method with `#[EventListener]`. The first (and only required) parameter determines which event type(s) the method handles.
+**Registering a listener:**
 
 ```php
 use Medas\Core\Attributes\{EventListener, Service};
@@ -55,34 +50,83 @@ use Medas\Core\Attributes\{EventListener, Service};
 #[Service]
 readonly class WelcomeMailListener
 {
+    public function __construct(
+        private Mailer $mailer,
+    ) {}
+
     #[EventListener]
     public function onUserRegistered(UserRegistered $event): void
     {
-        // send welcome email to $event->email
+        $this->mailer->sendWelcome($event->email);
     }
 }
 ```
 
-**Union types** are supported — the method will be registered for each listed event type:
+The method name is irrelevant — only the `#[EventListener]` attribute and the first parameter's type matter.
+
+**Dispatching an event:**
 
 ```php
-#[EventListener]
-public function onCreatedOrUpdated(UserCreated|UserUpdated $event): void
+// Via the global helper (most common)
+dispatch(new UserRegistered(42, 'alice@example.com'));
+
+// Via the injected service (when you need the returned event object)
+use Medas\Events\EventDispatcher;
+use Medas\Core\Attributes\Service;
+
+#[Service]
+readonly class RegistrationService
 {
-    // fires for both UserCreated and UserUpdated events
+    public function __construct(
+        private EventDispatcher $dispatcher,
+    ) {}
+
+    public function register(string $email): void
+    {
+        // ... create user ...
+
+        // dispatch() returns the event after all listeners have run,
+        // allowing you to read any state listeners may have set
+        $event = $this->dispatcher->dispatch(new UserRegistered($user->id, $email));
+    }
 }
 ```
 
-**Intersection types** (`TypeA&TypeB`) are not supported, because the dispatcher cannot unambiguously resolve a dispatch key from a compound type. An exception is thrown at startup if one is encountered.
+**Union type listeners — handling multiple event types in one method:**
 
-### Propagation stopping
+```php
+#[EventListener]
+public function onCreatedOrUpdated(InvoiceCreated|InvoiceUpdated $event): void
+{
+    // registered for both InvoiceCreated and InvoiceUpdated
+    $this->index->reindex($event->invoice);
+}
+```
 
-Implement `StoppableEventInterface` and return `true` from `isPropagationStopped()` inside a listener to prevent subsequent listeners from running.
+Intersection types (`TypeA&TypeB`) are not supported — `FirstParameterOfEventListenerIsNotAClass` is thrown at startup if one is encountered.
+
+**Lazy dispatch — skip construction when no listeners are registered:**
+
+```php
+use Medas\Events\EventDispatcher;
+
+// The closure is only called if at least one listener handles ReportGenerated
+$event = $this->dispatcher->lazyDispatch(
+    ReportGenerated::class,
+    fn() => new ReportGenerated(
+        report: $this->buildExpensiveReport(),
+    ),
+);
+
+// $event is null when no listeners are registered
+```
+
+**Propagation stopping:**
 
 ```php
 use Psr\EventDispatcher\StoppableEventInterface;
 
-class UserLogin implements StoppableEventInterface
+class LoginAttempt implements StoppableEventInterface
 {
     public bool $blocked = false;
 
@@ -93,40 +137,39 @@ class UserLogin implements StoppableEventInterface
 }
 ```
 
----
-
-## Dispatching events
-
-Resolve `EventDispatcher` from the service container and call `dispatch()`:
-
 ```php
-use Medas\Events\EventDispatcher;
-
-$dispatcher = service(EventDispatcher::class);
-
-$event = $dispatcher->dispatch(new UserRegistered(42, 'user@example.com'));
+#[EventListener]
+public function checkBannedIp(LoginAttempt $event): void
+{
+    if ($this->ipBanList->contains($event->ip)) {
+        $event->blocked = true;
+        // No further listeners will run after this
+    }
+}
 ```
 
-The same instance is returned after all listeners have run, allowing you to read any state the listeners may have set.
-
-### Lazy dispatch
-
-`lazyDispatch()` accepts the event class name and a factory callable. The factory is only invoked if at least one listener is registered for the event type. This is useful when constructing the event is expensive.
+**Reading listener state after dispatch:**
 
 ```php
-$event = $dispatcher->lazyDispatch(
-    UserRegistered::class,
-    fn() => new UserRegistered(
-        userId: $this->repository->lastInsertId(),
-        email:  $this->request->email(),
-    ),
+$event = $this->dispatcher->dispatch(new LoginAttempt($ip));
+
+if ($event->blocked) {
+    throw new AccessDeniedException();
+}
+```
+
+### Backend user context
+
+Event dispatching and listener registration are fully automatic — `dispatch()` is a global function available anywhere in the application, and listeners are discovered without any configuration beyond adding the `#[EventListener]` attribute.
+
+If a listener is added to a service class but the event never fires, there is no cost beyond the one-time discovery scan (which is cached). Removing a listener is as simple as removing the `#[EventListener]` attribute or the method.
+
+**Checking whether any listeners are registered for an event type** (e.g., to decide whether to bother preparing event data):
+
+```php
+// Use lazyDispatch instead of constructing the event manually
+$this->dispatcher->lazyDispatch(
+    HeavyProcessingCompleted::class,
+    fn() => new HeavyProcessingCompleted($this->runHeavyProcessing()),
 );
-
-// $event is null when no listeners are registered, otherwise the dispatched object
 ```
-
----
-
-## How listener discovery works
-
-On first use, `ListenerFinder` iterates all classes registered with the service manager. For every method annotated with `#[EventListener]`, it inspects the first parameter's type hint to determine which event class(es) the listener handles. The results are cached via the framework's `cache()` helper so discovery only happens once per request/process.
