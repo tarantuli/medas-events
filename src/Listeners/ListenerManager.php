@@ -34,7 +34,7 @@ readonly class ListenerManager implements ListenerProviderInterface
     }
 
     /** @return array<string, EventListener[]> */
-    private function getListeners(): array
+    public function getListeners(): array
     {
         return cache(__CLASS__, fn() => $this->listenerFinder->findAll());
     }

@@ -34,4 +34,9 @@ class EventListener implements EventListenerInterface
 
         return $this->callable;
     }
+
+    public function classAndMethod(): string
+    {
+        return $this->className . '::' . $this->methodName . '()';
+    }
 }
