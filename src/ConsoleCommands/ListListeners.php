@@ -56,6 +56,8 @@ readonly class ListListeners extends BaseConsoleCommand
 
                 $this->printer->printLine(Text::create('   ' . $description, SafeColor::Green));
             }
+
+            $this->printer->printEol();
         }
     }
 }
