@@ -51,14 +51,22 @@ readonly class ListListeners extends BaseConsoleCommand
     {
         $allListeners = $this->listenerManager->getListeners();
 
+        ksort($allListeners);
+
         foreach ($allListeners as $eventType => $listeners) {
             $this->printer->printLine(Text::create($eventType, SafeColor::Yellow));
 
+            $descriptions = [];
+
             foreach ($listeners as $listener) {
-                $description = $listener instanceof EventListener
+                $descriptions[] = $listener instanceof EventListener
                     ? $listener->classAndMethod()
                     : $this->callableDescriber->describe($listener);
+            }
 
+            sort($descriptions);
+
+            foreach ($descriptions as $description) {
                 $this->printer->printLine(Text::create('   ' . $description, SafeColor::Green));
             }
 
