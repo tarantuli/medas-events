@@ -37,6 +37,11 @@ readonly class ListListeners extends BaseConsoleCommand
         return 'list-listeners';
     }
 
+    public function aliases(): array
+    {
+        return ['event-listeners', 'listeners'];
+    }
+
     public function description(): string
     {
         return 'List all registered event listeners';
