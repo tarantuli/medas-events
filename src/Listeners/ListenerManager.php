@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Medas\Events\Listeners;
 
-use Medas\Core\Attributes\Service;
-use Medas\Core\Interfaces\EventListener;
+use Medas\Core\{Attributes\Service, Interfaces\EventListener};
 use Psr\EventDispatcher\ListenerProviderInterface;
 
 #[Service]
