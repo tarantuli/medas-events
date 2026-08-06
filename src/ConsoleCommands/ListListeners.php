@@ -57,17 +57,25 @@ readonly class ListListeners extends BaseConsoleCommand
             $this->printer->printLine(Text::create($eventType, SafeColor::Yellow));
 
             $descriptions = [];
+            $priorities = [];
 
             foreach ($listeners as $listener) {
                 $descriptions[] = $listener instanceof EventListener
                     ? $listener->classAndMethod()
                     : $this->callableDescriber->describe($listener);
+
+                $priorities[] = $listener instanceof EventListener ? $listener->priority() : 0;
             }
 
-            sort($descriptions);
+            foreach ($descriptions as $index => $description) {
+                $blocks = [Text::create('   ' . $description, SafeColor::Green)];
 
-            foreach ($descriptions as $description) {
-                $this->printer->printLine(Text::create('   ' . $description, SafeColor::Green));
+                if ($priorities[$index] !== 0) {
+                    $blocks[] = Text::create(' at priority ');
+                    $blocks[] = Text::create((string) $priorities[$index], SafeColor::Cyan);
+                }
+
+                $this->printer->printLine(...$blocks);
             }
 
             $this->printer->printEol();
