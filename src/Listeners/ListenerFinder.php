@@ -49,12 +49,22 @@ readonly class ListenerFinder
             }
         }
 
-        return $listeners;
+        // Higher priority runs first. usort is stable (PHP 8.0+), so listeners
+        // with equal priority keep the order they were discovered in.
+        return array_map(static function (array $typeListeners): array {
+            usort(
+                $typeListeners,
+                static fn(EventListener $a, EventListener $b) => $b->priority() <=> $a->priority()
+            );
+
+            return $typeListeners;
+        }, $listeners);
     }
 
     /** @param array<string, EventListener[]> $listeners */
     private function addListener(array &$listeners, \ReflectionMethod $method, string $className): void
     {
+        $priority = attribute(EventListenerAttribute::class, $method)->priority;
         $types = $this->firstParameterTypesFinder->find($method);
 
         foreach ($types as $type) {
@@ -62,7 +72,7 @@ readonly class ListenerFinder
                 $listeners[$type] = [];
             }
 
-            $listeners[$type][] = new EventListener($type, $className, $method->name);
+            $listeners[$type][] = new EventListener($type, $className, $method->name, $priority);
         }
     }
 }

@@ -14,6 +14,7 @@ class EventListener implements EventListenerInterface
         private readonly string $eventName,
         private readonly string $className,
         private readonly string $methodName,
+        private readonly int    $priority = 0,
     )
     {
     }
@@ -21,6 +22,11 @@ class EventListener implements EventListenerInterface
     public function eventName(): string
     {
         return $this->eventName;
+    }
+
+    public function priority(): int
+    {
+        return $this->priority;
     }
 
     public function callable(): callable
