@@ -8,10 +8,13 @@ use Medas\Core\{Attributes\Service, Interfaces\EventListener};
 use Psr\EventDispatcher\ListenerProviderInterface;
 
 #[Service]
-readonly class ListenerManager implements ListenerProviderInterface
+class ListenerManager implements ListenerProviderInterface
 {
+    /** @var array<string, EventListener[]>|null */
+    private array|null $listeners = null;
+
     public function __construct(
-        private ListenerFinder $listenerFinder,
+        private readonly ListenerFinder $listenerFinder,
     )
     {
     }
@@ -35,6 +38,10 @@ readonly class ListenerManager implements ListenerProviderInterface
     /** @return array<string, EventListener[]> */
     public function getListeners(): array
     {
-        return cache(__CLASS__, fn() => $this->listenerFinder->findAll());
+        // The table is derived from the code, so it cannot change while the process
+        // runs. The cache stays the source, so a persistent cache still spares a fresh
+        // process the scan; holding the result here only avoids asking the cache on
+        // every dispatch, which happens tens of thousands of times per request.
+        return $this->listeners ??= cache(__CLASS__, fn() => $this->listenerFinder->findAll());
     }
 }
